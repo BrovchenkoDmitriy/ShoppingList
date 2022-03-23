@@ -20,6 +20,8 @@ class ShopListAdapter : RecyclerView.Adapter<ShopListAdapter.ShopItemViewHolder>
             field = value
             notifyDataSetChanged()
         }
+    var onShopItemLongClickListener: ((ShopItem) -> Unit)? = null
+    var onShopItemClickListener: ((ShopItem) -> Unit)? = null
 
     //чтоб избежать избыточного выполнения findViewByID создаем viewHolder
     class ShopItemViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
@@ -27,11 +29,17 @@ class ShopListAdapter : RecyclerView.Adapter<ShopListAdapter.ShopItemViewHolder>
         val tvCount = view.findViewById<TextView>(R.id.tv_count)
     }
 
+    interface OnShopItemLongClickListener {
+        fun onShopItemLongClick(shopItem: ShopItem)
+    }
+
     companion object {
         const val ENABLED = 0
         const val DISABLED = 1
         const val MAX_POOL_SIZE = 10
     }
+
+
 
     //создаем view для каждого итема в зависимости от viewType
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ShopItemViewHolder {
@@ -55,8 +63,12 @@ class ShopListAdapter : RecyclerView.Adapter<ShopListAdapter.ShopItemViewHolder>
         holder.tvName.text = shopItem.name
         holder.tvCount.text = shopItem.count.toString()
         holder.view.setOnLongClickListener {
-            // viewModel.upgradeShopItem(shopItem)
+            onShopItemLongClickListener?.invoke(shopItem)
+            // viewModel.upgradeShopItem(shopItem) - нельзя обращаться к viewModel из адаптера напрямую. Используем интерфейс
             true
+        }
+        holder.view.setOnClickListener {
+            onShopItemClickListener?.invoke(shopItem)
         }
     }
 
