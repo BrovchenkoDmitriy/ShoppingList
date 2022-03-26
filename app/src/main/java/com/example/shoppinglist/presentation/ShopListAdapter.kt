@@ -1,52 +1,30 @@
 package com.example.shoppinglist.presentation
 
-import android.annotation.SuppressLint
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.ListAdapter
 import com.example.shoppinglist.R
 import com.example.shoppinglist.domain.ShopItem
-import java.lang.RuntimeException
 
-
-class ShopListAdapter : RecyclerView.Adapter<ShopListAdapter.ShopItemViewHolder>() {
+class ShopListAdapter : ListAdapter<ShopItem, ShopItemViewHolder>(ShopItemDiffCallBack()) {
     var times = 0
-    var shopList = listOf<ShopItem>()
-        @SuppressLint("NotifyDataSetChanged")
-        set(value) {
-            field = value
-            notifyDataSetChanged()
-        }
+
     var onShopItemLongClickListener: ((ShopItem) -> Unit)? = null
     var onShopItemClickListener: ((ShopItem) -> Unit)? = null
 
-    //чтоб избежать избыточного выполнения findViewByID создаем viewHolder
-    class ShopItemViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
-        val tvName = view.findViewById<TextView>(R.id.tv_name)
-        val tvCount = view.findViewById<TextView>(R.id.tv_count)
-    }
-
-    interface OnShopItemLongClickListener {
-        fun onShopItemLongClick(shopItem: ShopItem)
-    }
-
     companion object {
-        const val ENABLED = 0
-        const val DISABLED = 1
+        const val VIEW_ENABLED = 0
+        const val VIEW_DISABLED = 1
         const val MAX_POOL_SIZE = 10
     }
-
-
 
     //создаем view для каждого итема в зависимости от viewType
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ShopItemViewHolder {
         Log.d("onCreateViewHolder", "onCreateViewHolder use ${++times} times")
         val layout = when (viewType) {
-            ENABLED -> R.layout.item_shop_enabled
-            DISABLED -> R.layout.item_shop_disabled
+            VIEW_ENABLED -> R.layout.item_shop_enabled
+            VIEW_DISABLED -> R.layout.item_shop_disabled
             else -> throw RuntimeException("Unknown viewType $viewType")
         }
         val view = LayoutInflater.from(parent.context).inflate(
@@ -59,30 +37,26 @@ class ShopListAdapter : RecyclerView.Adapter<ShopListAdapter.ShopItemViewHolder>
 
     //привязываем к вьюшкам информацию
     override fun onBindViewHolder(holder: ShopItemViewHolder, position: Int) {
-        val shopItem = shopList[position]
+        val shopItem = getItem(position)
         holder.tvName.text = shopItem.name
         holder.tvCount.text = shopItem.count.toString()
         holder.view.setOnLongClickListener {
             onShopItemLongClickListener?.invoke(shopItem)
-            // viewModel.upgradeShopItem(shopItem) - нельзя обращаться к viewModel из адаптера напрямую. Используем интерфейс
             true
         }
         holder.view.setOnClickListener {
             onShopItemClickListener?.invoke(shopItem)
         }
     }
-
     //определяем viewType в зависимости от shopItem.enabled
     override fun getItemViewType(position: Int): Int {
-        val shopItem = shopList[position]
+        val shopItem = getItem(position)
         return if (shopItem.enabled) {
-            ENABLED
+            VIEW_ENABLED
         } else {
-            DISABLED
+            VIEW_DISABLED
         }
     }
 
-    override fun getItemCount(): Int {
-        return shopList.size
-    }
+
 }
