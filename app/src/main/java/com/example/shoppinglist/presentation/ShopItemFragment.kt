@@ -183,18 +183,5 @@ class ShopItemFragment: Fragment() {
                 }
             }
         }
-
-//        fun newIntentAddItem(context: Context): Intent {
-//            val intent = Intent(context, ShopItemActivity::class.java)
-//            intent.putExtra(EXTRA_SCREEN_MODE, MODE_ADD)
-//            return intent
-//        }
-//
-//        fun newIntentEditItem(context: Context, shopItemId: Int): Intent {
-//            val intent = Intent(context, ShopItemActivity::class.java)
-//            intent.putExtra(EXTRA_SCREEN_MODE, MODE_EDIT)
-//            intent.putExtra(EXTRA_SHOP_ITEM_ID, shopItemId)
-//            return intent
-//        }
     }
 }
