@@ -1,5 +1,6 @@
 package com.example.shoppinglist.presentation
 
+import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -14,7 +15,7 @@ import com.example.shoppinglist.R
 import com.example.shoppinglist.domain.ShopItem
 import com.google.android.material.textfield.TextInputLayout
 
-class ShopItemFragment: Fragment() {
+class ShopItemFragment : Fragment() {
 
     private lateinit var tilName: TextInputLayout
     private lateinit var tilCount: TextInputLayout
@@ -22,6 +23,7 @@ class ShopItemFragment: Fragment() {
     private lateinit var etCount: EditText
     private lateinit var buttonSave: Button
     lateinit var shopItemViewModel: ShopItemViewModel
+    private lateinit var onEditingIsFinishedListener: OnEditingIsFinishedListener
 
     private var screenMode = SCREEN_MODE_UNDEFINED
     private var shopItemId: Int = ShopItem.UNDEFINED_ID
@@ -29,6 +31,13 @@ class ShopItemFragment: Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         parseParams()
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if (context is OnEditingIsFinishedListener) {
+            onEditingIsFinishedListener = context
+        } else throw RuntimeException("Activity must implement OnEditingIsFinishedListener")
     }
 
     override fun onCreateView(
@@ -49,7 +58,6 @@ class ShopItemFragment: Fragment() {
     }
 
 
-
     private fun setupViewModelObservers() {
         shopItemViewModel.errorInputName.observe(viewLifecycleOwner) {
             val message = if (it) {
@@ -64,7 +72,8 @@ class ShopItemFragment: Fragment() {
             tilCount.error = message
         }
         shopItemViewModel.closeShopItemScreen.observe(viewLifecycleOwner) {
-            activity?.onBackPressed()
+            //activity?.onBackPressed()
+            onEditingIsFinishedListener.onEditingIsFinishedListener()
         }
 
     }
@@ -80,7 +89,7 @@ class ShopItemFragment: Fragment() {
             }
 
             override fun afterTextChanged(s: Editable?) {
-                if (s?.isBlank()==true) tilName.error = getString(R.string.error_input_name)
+                if (s?.isBlank() == true) tilName.error = getString(R.string.error_input_name)
             }
         })
 
@@ -95,7 +104,7 @@ class ShopItemFragment: Fragment() {
 
             override fun afterTextChanged(s: Editable?) {
                 if ((s == null) || s.isBlank() || (s.toString().toInt() <= 0)) {
-                   tilCount.error = getString(R.string.error_input_count)
+                    tilCount.error = getString(R.string.error_input_count)
                 }
             }
         })
@@ -137,7 +146,7 @@ class ShopItemFragment: Fragment() {
             throw RuntimeException("Param screen mode is absent")
         }
         val mode = args.getString(SCREEN_MODE)
-           // intent.getStringExtra(EXTRA_SCREEN_MODE)
+        // intent.getStringExtra(EXTRA_SCREEN_MODE)
         if (mode != MODE_ADD && mode != MODE_EDIT) {
             throw java.lang.RuntimeException("Param screen mode is wrong")
         }
@@ -160,6 +169,10 @@ class ShopItemFragment: Fragment() {
         buttonSave = view.findViewById(R.id.save_button)
     }
 
+    interface OnEditingIsFinishedListener {
+        fun onEditingIsFinishedListener()
+    }
+
     companion object {
         private const val SCREEN_MODE = "extra_mode"
         private const val MODE_EDIT = "mode_edit"
@@ -167,15 +180,15 @@ class ShopItemFragment: Fragment() {
         private const val SHOP_ITEM_ID = "ExtraShopItemID"
         private const val SCREEN_MODE_UNDEFINED = ""
 
-        fun newInstanceAddItem(): Fragment{
-            return ShopItemFragment().apply{
+        fun newInstanceAddItem(): Fragment {
+            return ShopItemFragment().apply {
                 arguments = Bundle().apply {
                     putString(SCREEN_MODE, MODE_ADD)
                 }
             }
         }
 
-        fun newInstanceEditItem(shopItemId: Int):Fragment{
+        fun newInstanceEditItem(shopItemId: Int): Fragment {
             return ShopItemFragment().apply {
                 arguments = Bundle().apply {
                     putString(SCREEN_MODE, MODE_EDIT)
