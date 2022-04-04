@@ -10,15 +10,9 @@ import com.example.shoppinglist.domain.ShopItem
 
 class ShopItemActivity : AppCompatActivity() {
 
-//    private lateinit var tilName: TextInputLayout
-//    private lateinit var tilCount: TextInputLayout
-//    private lateinit var etName: EditText
-//    private lateinit var etCount: EditText
-//    private lateinit var buttonSave: Button
-//    lateinit var shopItemViewModel: ShopItemViewModel
     private var screenMode = SCREEN_MODE_UNDEFINED
     private var shopItemId: Int = ShopItem.UNDEFINED_ID
-    //private var mode: String? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
