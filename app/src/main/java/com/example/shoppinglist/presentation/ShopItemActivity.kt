@@ -50,8 +50,6 @@ class ShopItemActivity : AppCompatActivity(), ShopItemFragment.OnEditingIsFinish
             }
             shopItemId = intent.getIntExtra(EXTRA_SHOP_ITEM_ID, ShopItem.UNDEFINED_ID)
         }
-
-
     }
 
     companion object {

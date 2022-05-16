@@ -4,31 +4,27 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentContainerView
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.shoppinglist.R
+import com.example.shoppinglist.databinding.ActivityMainBinding
 import com.example.shoppinglist.presentation.ShopItemActivity.Companion.newIntentAddItem
 import com.example.shoppinglist.presentation.ShopItemActivity.Companion.newIntentEditItem
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditingIsFinishedListener {
 
+    private lateinit var binding: ActivityMainBinding
     private lateinit var viewModel: MainViewModel
     private lateinit var shopListAdapter: ShopListAdapter
-    private lateinit var addItemButton: FloatingActionButton
-    private var shopItemContainer: FragmentContainerView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        shopItemContainer = findViewById(R.id.shop_item_container)
-
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         setupRecyclerView()
-        addItemButton = findViewById(R.id.button_add_shop_item)
 
-        addItemButton.setOnClickListener {
+        binding.buttonAddShopItem.setOnClickListener {
             if (isPortraitMode()) {
                 val intent = newIntentAddItem(this)
                 startActivity(intent)
@@ -49,7 +45,7 @@ class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditingIsFinishedLi
     }
 
     private fun isPortraitMode(): Boolean {
-        return shopItemContainer == null
+        return binding.shopItemContainer == null
     }
 
     private fun launchShopItemFragment(fragment: Fragment) {
@@ -60,8 +56,7 @@ class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditingIsFinishedLi
     }
 
     private fun setupRecyclerView() {
-        val rvShopList = findViewById<RecyclerView>(R.id.rv_shop_list)
-        with(rvShopList) {
+        with(binding.rvShopList) {
             shopListAdapter = ShopListAdapter()
             adapter = shopListAdapter
             //устанавливаем максимальный пул для разных TypeView
@@ -76,8 +71,7 @@ class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditingIsFinishedLi
         }
         setupLongClickListener()
         setupClickListener()
-        setupSwipeListener(rvShopList)
-
+        setupSwipeListener(binding.rvShopList)
     }
 
     private fun setupSwipeListener(rvShopList: RecyclerView) {

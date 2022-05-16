@@ -7,21 +7,17 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.example.shoppinglist.R
+import com.example.shoppinglist.databinding.FragmentShopItemBinding
 import com.example.shoppinglist.domain.ShopItem
-import com.google.android.material.textfield.TextInputLayout
 
 class ShopItemFragment : Fragment() {
 
-    private lateinit var tilName: TextInputLayout
-    private lateinit var tilCount: TextInputLayout
-    private lateinit var etName: EditText
-    private lateinit var etCount: EditText
-    private lateinit var buttonSave: Button
+    private var _binding: FragmentShopItemBinding? = null
+    private val binding: FragmentShopItemBinding
+        get() = _binding ?: throw java.lang.RuntimeException("FragmentShopItemBinding == null")
+
     lateinit var shopItemViewModel: ShopItemViewModel
     private lateinit var onEditingIsFinishedListener: OnEditingIsFinishedListener
 
@@ -44,42 +40,32 @@ class ShopItemFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_shop_item, container, false)
+    ): View {
+        _binding = FragmentShopItemBinding.inflate(
+            layoutInflater, container, false
+        )
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        initViews(view)
         shopItemViewModel = ViewModelProvider(this).get(ShopItemViewModel::class.java)
+        binding.viewModel = shopItemViewModel
+        binding.lifecycleOwner = viewLifecycleOwner
         nameAndCountTextListener()
         chooseRightMode()
         setupViewModelObservers()
         super.onViewCreated(view, savedInstanceState)
     }
 
-
     private fun setupViewModelObservers() {
-        shopItemViewModel.errorInputName.observe(viewLifecycleOwner) {
-            val message = if (it) {
-                getString(R.string.error_input_name)
-            } else null
-            tilName.error = message
-        }
-        shopItemViewModel.errorInputCount.observe(viewLifecycleOwner) {
-            val message = if (it) {
-                getString(R.string.error_input_count)
-            } else null
-            tilCount.error = message
-        }
         shopItemViewModel.closeShopItemScreen.observe(viewLifecycleOwner) {
-            //activity?.onBackPressed()
             onEditingIsFinishedListener.onEditingIsFinishedListener()
         }
 
     }
 
     private fun nameAndCountTextListener() {
-        etName.addTextChangedListener(object : TextWatcher {
+        binding.etName.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
 
             }
@@ -89,11 +75,12 @@ class ShopItemFragment : Fragment() {
             }
 
             override fun afterTextChanged(s: Editable?) {
-                if (s?.isBlank() == true) tilName.error = getString(R.string.error_input_name)
+//                if (s?.isBlank() == true) binding.tilName.error =
+//                    getString(R.string.error_input_name)
             }
         })
 
-        etCount.addTextChangedListener(object : TextWatcher {
+        binding.etCount.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
 
             }
@@ -103,9 +90,9 @@ class ShopItemFragment : Fragment() {
             }
 
             override fun afterTextChanged(s: Editable?) {
-                if ((s == null) || s.isBlank() || (s.toString().toInt() <= 0)) {
-                    tilCount.error = getString(R.string.error_input_count)
-                }
+//                if ((s == null) || s.isBlank() || (s.toString().toInt() <= 0)) {
+//                    binding.tilCount.error = getString(R.string.error_input_count)
+//                }
             }
         })
     }
@@ -119,23 +106,19 @@ class ShopItemFragment : Fragment() {
 
     private fun launchEditMode() {
         shopItemViewModel.getShopItem(shopItemId)
-        shopItemViewModel.shopItem.observe(viewLifecycleOwner) {
-            etName.setText(it.name)
-            etCount.setText(it.count.toString())
-        }
-        buttonSave.setOnClickListener {
+        binding.saveButton.setOnClickListener {
             shopItemViewModel.upgradeShopItem(
-                etName.text?.toString(),
-                etCount.text?.toString()
+                binding.etName.text?.toString(),
+                binding.etCount.text?.toString()
             )
         }
     }
 
     private fun launchAddMode() {
-        buttonSave.setOnClickListener {
+        binding.saveButton.setOnClickListener {
             shopItemViewModel.addShopItem(
-                etName.text?.toString(),
-                etCount.text?.toString()
+                binding.etName.text?.toString(),
+                binding.etCount.text?.toString()
             )
         }
     }
@@ -146,7 +129,6 @@ class ShopItemFragment : Fragment() {
             throw RuntimeException("Param screen mode is absent")
         }
         val mode = args.getString(SCREEN_MODE)
-        // intent.getStringExtra(EXTRA_SCREEN_MODE)
         if (mode != MODE_ADD && mode != MODE_EDIT) {
             throw java.lang.RuntimeException("Param screen mode is wrong")
         }
@@ -157,16 +139,6 @@ class ShopItemFragment : Fragment() {
             }
             shopItemId = args.getInt(SHOP_ITEM_ID, ShopItem.UNDEFINED_ID)
         }
-
-
-    }
-
-    private fun initViews(view: View) {
-        tilName = view.findViewById(R.id.til_name)
-        tilCount = view.findViewById(R.id.til_count)
-        etName = view.findViewById(R.id.et_name)
-        etCount = view.findViewById(R.id.et_count)
-        buttonSave = view.findViewById(R.id.save_button)
     }
 
     interface OnEditingIsFinishedListener {
