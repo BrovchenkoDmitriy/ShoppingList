@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditingIsFinishedLi
                 launchShopItemFragment(ShopItemFragment.newInstanceAddItem())
             }
         }
-        viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
+        viewModel = ViewModelProvider(this)[MainViewModel::class.java]
         viewModel.shopList.observe(this) {
             shopListAdapter.submitList(it)
         }

@@ -16,7 +16,7 @@ class ShopItemFragment : Fragment() {
 
     private var _binding: FragmentShopItemBinding? = null
     private val binding: FragmentShopItemBinding
-        get() = _binding ?: throw java.lang.RuntimeException("FragmentShopItemBinding == null")
+        get() = _binding ?: throw RuntimeException("FragmentShopItemBinding == null")
 
     lateinit var shopItemViewModel: ShopItemViewModel
     private lateinit var onEditingIsFinishedListener: OnEditingIsFinishedListener

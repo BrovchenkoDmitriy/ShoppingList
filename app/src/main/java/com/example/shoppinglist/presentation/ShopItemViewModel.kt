@@ -1,16 +1,19 @@
 package com.example.shoppinglist.presentation
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.shoppinglist.data.ShopListRepositoryImpl
 import com.example.shoppinglist.domain.AddShopItemUseCase
 import com.example.shoppinglist.domain.GetShopItemUseCase
-import com.example.shoppinglist.domain.UpgradeShopItemUseCase
 import com.example.shoppinglist.domain.ShopItem
+import com.example.shoppinglist.domain.UpgradeShopItemUseCase
+import kotlinx.coroutines.launch
 
-class ShopItemViewModel : ViewModel() {
-    private val repository = ShopListRepositoryImpl
+class ShopItemViewModel(application: Application) : AndroidViewModel(application) {
+    private val repository = ShopListRepositoryImpl(application)
 
     private val upgradeShopItemUseCase = UpgradeShopItemUseCase(repository)
     private val addShopItemUseCase = AddShopItemUseCase(repository)
@@ -32,30 +35,47 @@ class ShopItemViewModel : ViewModel() {
     val closeShopItemScreen: LiveData<Unit>
         get() = _closeShopItemScreen
 
+//    private val scope = CoroutineScope(Dispatchers.IO)
+//
+//    override fun onCleared() {
+//        super.onCleared()
+//        scope.cancel()
+//    }
+
     fun getShopItem(shopItemID: Int) {
-        val item = getShopItemUseCase.getShopItem(shopItemID)
-        _shopItem.value = item
+        viewModelScope.launch {
+            val item = getShopItemUseCase.getShopItem(shopItemID)
+            _shopItem.value = item
+        }
+
+
     }
 
     fun addShopItem(inputName: String?, inputCount: String?) {
+
         val name = parseName(inputName)
         val count = parseCount(inputCount)
         val fieldsValid = validateInput(name, count)
         if (fieldsValid) {
-            addShopItemUseCase.addShopItem(ShopItem(name, count, true))
-            finish()
+            viewModelScope.launch {
+                addShopItemUseCase.addShopItem(ShopItem(name, count, true))
+                finish()
+            }
         }
     }
 
     fun upgradeShopItem(inputName: String?, inputCount: String?) {
+
         val name = parseName(inputName)
         val count = parseCount(inputCount)
         val fieldsValid = validateInput(name, count)
         if (fieldsValid) {
             _shopItem.value?.let {
-                val item = it.copy(name = name, count = count)
-                upgradeShopItemUseCase.upgradeShopItem(item)
-                finish()
+                viewModelScope.launch {
+                    val item = it.copy(name = name, count = count)
+                    upgradeShopItemUseCase.upgradeShopItem(item)
+                    finish()
+                }
             }
         }
     }
