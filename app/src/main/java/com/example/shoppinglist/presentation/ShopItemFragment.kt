@@ -9,31 +9,42 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.example.shoppinglist.ShoppingListApp
 import com.example.shoppinglist.databinding.FragmentShopItemBinding
 import com.example.shoppinglist.domain.ShopItem
+import javax.inject.Inject
 
 class ShopItemFragment : Fragment() {
+
+    private val component by lazy {
+        (requireActivity().application as ShoppingListApp).component
+    }
+
+    @Inject
+    lateinit var viewModelFactory: ViewModelFactory
+    lateinit var shopItemViewModel: ShopItemViewModel
 
     private var _binding: FragmentShopItemBinding? = null
     private val binding: FragmentShopItemBinding
         get() = _binding ?: throw RuntimeException("FragmentShopItemBinding == null")
 
-    lateinit var shopItemViewModel: ShopItemViewModel
+
     private lateinit var onEditingIsFinishedListener: OnEditingIsFinishedListener
 
     private var screenMode = SCREEN_MODE_UNDEFINED
     private var shopItemId: Int = ShopItem.UNDEFINED_ID
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        parseParams()
-    }
-
     override fun onAttach(context: Context) {
+        component.inject(this)
         super.onAttach(context)
         if (context is OnEditingIsFinishedListener) {
             onEditingIsFinishedListener = context
         } else throw RuntimeException("Activity must implement OnEditingIsFinishedListener")
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        parseParams()
     }
 
     override fun onCreateView(
@@ -48,7 +59,7 @@ class ShopItemFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        shopItemViewModel = ViewModelProvider(this).get(ShopItemViewModel::class.java)
+        shopItemViewModel = ViewModelProvider(this, viewModelFactory)[ShopItemViewModel::class.java]
         binding.viewModel = shopItemViewModel
         binding.lifecycleOwner = viewLifecycleOwner
         nameAndCountTextListener()

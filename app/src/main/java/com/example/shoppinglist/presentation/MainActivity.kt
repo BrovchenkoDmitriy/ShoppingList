@@ -1,6 +1,7 @@
 package com.example.shoppinglist.presentation
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -8,21 +9,39 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.shoppinglist.R
+import com.example.shoppinglist.ShoppingListApp
 import com.example.shoppinglist.databinding.ActivityMainBinding
 import com.example.shoppinglist.presentation.ShopItemActivity.Companion.newIntentAddItem
 import com.example.shoppinglist.presentation.ShopItemActivity.Companion.newIntentEditItem
+import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditingIsFinishedListener {
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var viewModel: MainViewModel
     private lateinit var shopListAdapter: ShopListAdapter
+    private lateinit var viewModel: MainViewModel
+
+    private val component by lazy {
+        (application as ShoppingListApp).component
+    }
+
+    @Inject
+    lateinit var viewModelFactory: ViewModelFactory
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        component.inject(this)
         super.onCreate(savedInstanceState)
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setupRecyclerView()
+        Log.d("TAGI", "init viewModel")
+        viewModel = ViewModelProvider(this, viewModelFactory)[MainViewModel::class.java]
+        Log.d("TAGI", "init viewModel success")
+        viewModel.shopList.observe(this) {
+            shopListAdapter.submitList(it)
+        }
 
         binding.buttonAddShopItem.setOnClickListener {
             if (isPortraitMode()) {
@@ -32,16 +51,11 @@ class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditingIsFinishedLi
                 launchShopItemFragment(ShopItemFragment.newInstanceAddItem())
             }
         }
-        viewModel = ViewModelProvider(this)[MainViewModel::class.java]
-        viewModel.shopList.observe(this) {
-            shopListAdapter.submitList(it)
-        }
     }
 
     override fun onEditingIsFinishedListener() {
         Toast.makeText(this@MainActivity, "Success", Toast.LENGTH_SHORT).show()
         supportFragmentManager.popBackStack()
-
     }
 
     private fun isPortraitMode(): Boolean {
@@ -52,7 +66,6 @@ class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditingIsFinishedLi
         supportFragmentManager.popBackStack()
         supportFragmentManager.beginTransaction().replace(R.id.shop_item_container, fragment)
             .addToBackStack(null).commit()
-
     }
 
     private fun setupRecyclerView() {
