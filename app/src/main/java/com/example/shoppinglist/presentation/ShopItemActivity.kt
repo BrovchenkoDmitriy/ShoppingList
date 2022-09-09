@@ -11,6 +11,7 @@ import com.example.shoppinglist.domain.ShopItem
 
 class ShopItemActivity : AppCompatActivity(), ShopItemFragment.OnEditingIsFinishedListener {
 
+
     private var screenMode = SCREEN_MODE_UNDEFINED
     private var shopItemId: Int = ShopItem.UNDEFINED_ID
 
