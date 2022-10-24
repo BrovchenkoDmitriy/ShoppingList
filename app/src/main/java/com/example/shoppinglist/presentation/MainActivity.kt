@@ -1,5 +1,6 @@
 package com.example.shoppinglist.presentation
 
+import android.content.ContentValues
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -152,6 +153,18 @@ class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditingIsFinishedLi
                 startActivity(intent)
             } else {
                 launchShopItemFragment(ShopItemFragment.newInstanceEditItem(it.id))
+            }
+            thread {
+
+                contentResolver?.update(
+                    Uri.parse("content://com.example.shoppinglist/shop_items"),
+                    ContentValues().apply {
+                        put("name", "Тест метода update()")
+                        put("count", "100500")
+                    },
+                    null,
+                    arrayOf(it.id.toString())
+                )
             }
         }
     }
